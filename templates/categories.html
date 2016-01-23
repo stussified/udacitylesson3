@@ -1,0 +1,20 @@
+<html>
+<body>
+
+	<ul>
+	{% for category in categories%}
+		<li>{{ category.name }}</li>
+
+	{% endfor %}
+	</ul>
+
+
+	<ul>
+	{% for item in category_item %}
+		<li>{{ item.name }}</li>
+
+	{% endfor %}
+	</ul>
+
+</body>
+</html>

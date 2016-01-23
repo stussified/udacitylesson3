@@ -1,0 +1,9 @@
+<html>
+<body>
+<h1>Edit Category</h1>
+
+<form action="{{ url_for('editCategory',category=category.name)}}" method = "post">
+	<input type ="text" maxlength="100" name="name">
+	<input type = 'submit' value='Update'>
+</body>
+</html>
