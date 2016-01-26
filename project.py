@@ -87,6 +87,37 @@ def showItems(category):
     items = session.query(CategoryItem).filter_by(name=category).all()
     return render_template('items.html', items = items, category = category)
 
+
+
+# New category item
+@app.route('/catalog/<category>/items/new/')
+def newItem(category):
+
+	# LOGIN VALIDATION
+    # if 'username' not in login_session:
+    #     return redirect('/login')		
+    category = session.query(Category).filter_by(name=category).one()
+    if request.method == 'POST':
+    	newItem = CategoryItem(name=request.form['name'], description=request.form['description']
+    	category_id=category.id)
+    	session.add(newItem)
+    	session.commit()
+    	flash('New Item %s has been added' % (newItem.name))
+    	return redirect(url_for('showItems', category=category))
+    else:
+    	render_template('newitem.html', category=category)
+
+
+# Edit category item
+
+
+# Delete category item
+
+
+
+
+
+
 if __name__ == '__main__':
     app.secret_key = 'super_secret_key'
     app.debug = True
