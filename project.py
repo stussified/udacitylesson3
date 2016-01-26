@@ -84,7 +84,7 @@ def showItems(category):
     # if 'username' not in login_session:
     #     return redirect('/login')	
     category = session.query(Category).filter_by(name=category).one()
-    items = session.query(CategoryItem).filter_by(name=category).all()
+    items = session.query(CategoryItem).filter_by(category_id=category.id).all()
     return render_template('items.html', items = items, category = category)
 
 
@@ -98,14 +98,14 @@ def newItem(category):
     #     return redirect('/login')		
     category = session.query(Category).filter_by(name=category).one()
     if request.method == 'POST':
-    	newItem = CategoryItem(name=request.form['name'], description=request.form['description']
-    	category_id=category.id)
+    	newItem = CategoryItem(name=request.form['name'], description=request.form['description'],
+    		category_id=category.id)
     	session.add(newItem)
     	session.commit()
     	flash('New Item %s has been added' % (newItem.name))
-    	return redirect(url_for('showItems', category=category))
+    	return redirect(url_for('showItems', category=category.name))
     else:
-    	render_template('newitem.html', category=category)
+	   	return render_template('newItem.html', category=category.name)
 
 
 # Edit category item
