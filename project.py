@@ -4,6 +4,15 @@ from sqlalchemy.orm import sessionmaker
 from database_setup import Base, Category, CategoryItem, User
 from flask import session as login_session
 
+import random
+from oauth2client.client import flow_from_clientsecrets
+from oauth2client.client import FlowExchangeError
+import httplib2
+import json
+from flask import make_response
+
+
+
 # Connect to Database and create database session
 engine = create_engine('sqlite:///catalog.db')
 Base.metadata.bind = engine
@@ -12,7 +21,6 @@ DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
 app = Flask(__name__)
-
 
 # Catalog Section
 # Be sure to add some sort of thing so it takes lower case category names.
@@ -90,37 +98,71 @@ def showItems(category):
 
 
 # New category item
-@app.route('/catalog/<category>/items/new/')
+@app.route('/catalog/<category>/items/new/', methods = ['GET', 'POST'])
 def newItem(category):
 
 	# LOGIN VALIDATION
     # if 'username' not in login_session:
     #     return redirect('/login')		
+    # Following the way that Udacity does things, the "string" becomes a SqlAlchemy object
+    
     category = session.query(Category).filter_by(name=category).one()
+    
+    # category is now an object and needs to be referred to as such.
+
     if request.method == 'POST':
     	newItem = CategoryItem(name=request.form['name'], description=request.form['description'],
-    		category_id=category.id)
+    		category=category)
     	session.add(newItem)
     	session.commit()
     	flash('New Item %s has been added' % (newItem.name))
     	return redirect(url_for('showItems', category=category.name))
     else:
-	   	return render_template('newItem.html', category=category.name)
+        # at this point, category is still a string from the URL rather than the object.
+        print "Request method was not POST"
+        return render_template('newItem.html', category=category)
 
 
 # Edit category item
-@app.route('/catalog/<category>/items/<int:item_id>/edit/')
+@app.route('/catalog/<category>/items/<int:item_id>/edit/', methods = ['GET', 'POST'])
 def editItem(category, item_id):
-	editedCategory = session.query(Category).filter_by(name=category).one()
-	editedItem = session.query(CategoryItem).filter_by(id=item_id).one()
-	return editedItem.name
+
+    # LOGIN VALIDATION
+    # if 'username' not in login_session:
+    #     return redirect('/login')     
+    editedCategory = session.query(Category).filter_by(name=category).one()
+    editedItem = session.query(CategoryItem).filter_by(id=item_id).one()
+    if request.method == 'POST':
+        if request.form['name']:
+            editedItem.name = request.form['name']
+        if request.form['description']:
+            editedItem.description = request.form['description']
+        # if request.form['category']:
+        #     editedItem.category = request.form['category']
+        session.add(editedItem)
+        session.commit()
+        flash('Menu Item Successfully Edited')
+        return redirect(url_for('showItems', category=category))
+    else:
+        return render_template('editCategoryItem.html', category=category, item=editedItem)
 
 
 # Delete category item
+@app.route('/catalog/<category>/items/<int:item_id>/delete', methods =['POST', 'GET'])
+def deleteItem(category, item_id):
 
-
-
-
+    # LOGIN VALIDATION
+    # if 'username' not in login_session:
+    #     return redirect('/login') 
+    deleteItemCategory = session.query(Category).filter_by(name=category).one()     
+    itemToDelete = session.query(CategoryItem).filter_by(id=item_id).one()
+    if request.method == 'POST':
+        session.delete(itemToDelete)
+        session.commit()
+        flash('Item successfully deleted.')
+        return redirect(url_for('showCategories', category=category))
+    else:
+        return render_template('deleteCategoryItem.html', item=itemToDelete)
 
 
 if __name__ == '__main__':
