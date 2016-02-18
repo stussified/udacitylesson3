@@ -109,6 +109,11 @@ def newItem(category):
 
 
 # Edit category item
+@app.route('/catalog/<category>/items/<int:item_id>/edit/')
+def editItem(category, item_id):
+	editedCategory = session.query(Category).filter_by(name=category).one()
+	editedItem = session.query(CategoryItem).filter_by(id=item_id).one()
+	return editedItem.name
 
 
 # Delete category item
