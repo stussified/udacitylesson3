@@ -10,7 +10,7 @@ import httplib2
 import json
 import string
 from flask import make_response
-
+import requests
 
 
 # Connect to Database and create database session
@@ -21,6 +21,11 @@ DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
 app = Flask(__name__)
+
+# loading client ID
+
+CLIENT_ID = json.loads(open('client_secrets.json', 'r').read())['web']['client_id']
+
 
 # Login section - only using GConnect
 
@@ -59,7 +64,7 @@ def gconnect():
 
     # Check the token is valid
     access_token = credentials.access_token
-    url = ('https://googleapis.com/oauth2/v1/tokeninfo?access_token=%s' 
+    url = ('https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=%s' 
         % access_token)
     h = httplib2.Http()
     result = json.loads(h.request(url, 'GET')[1])
@@ -86,7 +91,7 @@ def gconnect():
         return response
 
     stored_access_token = login_session.get('access_token')
-    stored_gplus_id = login.session.get('gplus_id')
+    stored_gplus_id = login_session.get('gplus_id')
 
     if stored_access_token is not None and gplus_id == stored_gplus_id:
         response = make_response(json.dumps('User is already connected'), 200)
@@ -99,7 +104,7 @@ def gconnect():
 
 
     # get user info
-    userinfo_url = 'https://googleapis.com/oauth2/v1/userinfo'
+    userinfo_url = 'https://www.googleapis.com/oauth2/v1/userinfo'
     params = {'access_token': credentials.access_token, 'alt': 'json'}
     answer = requests.get(userinfo_url, params=params)
 
