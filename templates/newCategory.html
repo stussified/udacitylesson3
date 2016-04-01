@@ -1,9 +1,18 @@
-<html>
-<body>
+{% extends "main.html" %}
+{% block content %}
+{% include "header.html" %}
+<div class="row divider green">
+<div class="col-md-12">
+	
+</div></div>
+
+<div class="row banner menu">
+	<div class="col-md-11 col-md-offset-1 padding-none">
 <h1>New Category</h1>
+</div>
+</div>
+<p>What category do you want to create?</p>
 	<form action = "{{ url_for('newCategory') }}" method ='POST'>
 	<input type ="text" maxlength="100" name="name">
 	<input type = 'submit' value='Create'>
-
-</body>
-</html>
+{% endblock %}

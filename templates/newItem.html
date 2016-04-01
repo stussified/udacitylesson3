@@ -1,7 +1,15 @@
-<html>
-<body>
+{% extends "main.html" %}
+{% block content %}
+{% include "header.html" %}
+<div class="row divider green">
+<div class="col-md-12">
+	
+</div></div>
 
-	<h1>New Catalog Item</h1>
+<div class="row banner menu">
+	<div class="col-md-11 col-md-offset-1 padding-none">
+		<h1>New Catalog Item</h1>
+	</div>
 
 	<form action = "{{ url_for('newItem', category = category.name) }}" method = 'post'>
 
@@ -9,8 +17,6 @@
 		<input type = 'text' size = '30' name='name'>
 		<p>Description:</p>
 		<input size = '100' name='description'>
-		<input type = 'submit' value='Update'>
+		<input type = 'submit' value='Add Item'>
 
-
-</body>
-</html>
+{% endblock %}

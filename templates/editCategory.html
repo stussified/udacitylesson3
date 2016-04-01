@@ -1,9 +1,18 @@
-<html>
-<body>
-<h1>Edit Category</h1>
+{% extends "main.html" %}
+{% block content %}
+{% include "header.html" %}
+<div class="row divider green">
+<div class="col-md-12">
+	
+</div></div>
 
+<div class="row banner menu">
+	<div class="col-md-11 col-md-offset-1 padding-none">
+	<h1>Edit Category</h1>
+</div>
+</div>
+<p>What would you like to change the category name to?</p>
 <form action="{{ url_for('editCategory',category=category.name)}}" method = "post">
 	<input type ="text" maxlength="100" name="name">
 	<input type = 'submit' value='Update'>
-</body>
-</html>
+{% endblock %}

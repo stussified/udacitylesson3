@@ -114,14 +114,20 @@ def gconnect():
     login_session['picture'] = data['picture']
     login_session['email'] = data['email']
 
+    user_id = getUserID(data["email"])
+    if not user_id:
+        user_id = createUser(login_session)
+    login_session['user_id'] = user_id
+
     output = ''
     output += '<h1>Welcome, '
     output += login_session['username']
     output += '!</h1>'
     output += '<img src="'
     output += login_session['picture']
-    output += '> style = "width: 300px; height: 300px;border-radius: 150px;-webkit-border-radius: 150px;-moz-border-radius: 150px;">'
+    output += '" style = "width: 100px; height: 100px;border-radius: 150px;-webkit-border-radius: 150px;-moz-border-radius: 150px;">'
     flash("you are now logged in as %s" % login_session['username'])
+    print login_session
     return output
 
 # disconnect/logout from Gconnect
@@ -146,7 +152,8 @@ def gdisconnect():
         del login_session['picture']
         response = make_response(json.dumps('Successfully disconnected.'), 200)
         response.headers['Content-Type'] = 'application/json'
-        return response
+        # return response
+        return redirect(url_for('showCategories'))
     else:
 
         response = make_response(json.dumps('Failed to revoke token'), 400)
@@ -167,11 +174,11 @@ def showCategories():
 def newCategory():
 
 	# LOGIN VALIDATION 	
-	# if 'username' not in login_session:
-	# 	return redirect('/login')
+	if 'username' not in login_session:
+		return redirect('/login')
 
-	if request.method == 'POST':
-		newCategory = Category(name=request.form['name'])
+	if request.method == 'POST': 
+		newCategory = Category(name=request.form['name'], user_id = getUserID(login_session['email']))
 		session.add(newCategory)
 		flash('Category \"%s\" has been successfully created' % newCategory.name)
 		session.commit()
@@ -184,8 +191,8 @@ def newCategory():
 def editCategory(category):
 
 	# LOGIN VALIDATION
-    # if 'username' not in login_session:
-    #     return redirect('/login')
+    if 'username' not in login_session:
+        return redirect('/login')
     editedCategory = session.query(Category).filter_by(name=category).one()
     if request.method == 'POST':
         if request.form['name']:
@@ -199,8 +206,8 @@ def editCategory(category):
 def deleteCategory(category):
 
 	# LOGIN VALIDATION
-    # if 'username' not in login_session:
-    #     return redirect('/login')	
+    if 'username' not in login_session:
+        return redirect('/login')	
     categoryToDelete = session.query(Category).filter_by(name=category).one()
     print "category",category	
 
@@ -219,8 +226,6 @@ def deleteCategory(category):
 def showItems(category):
 
 	# LOGIN VALIDATION
-    # if 'username' not in login_session:
-    #     return redirect('/login')	
     category = session.query(Category).filter_by(name=category).one()
     items = session.query(CategoryItem).filter_by(category_id=category.id).all()
     return render_template('items.html', items = items, category = category)
@@ -232,17 +237,16 @@ def showItems(category):
 def newItem(category):
 
 	# LOGIN VALIDATION
-    # if 'username' not in login_session:
-    #     return redirect('/login')		
+    if 'username' not in login_session:
+        return redirect('/login')		
     # Following the way that Udacity does things, the "string" becomes a SqlAlchemy object
     
     category = session.query(Category).filter_by(name=category).one()
     
     # category is now an object and needs to be referred to as such.
-
     if request.method == 'POST':
     	newItem = CategoryItem(name=request.form['name'], description=request.form['description'],
-    		category=category)
+    		category=category, user_id = getUserID(login_session['email']))
     	session.add(newItem)
     	session.commit()
     	flash('New Item %s has been added' % (newItem.name))
@@ -258,8 +262,8 @@ def newItem(category):
 def editItem(category, item_id):
 
     # LOGIN VALIDATION
-    # if 'username' not in login_session:
-    #     return redirect('/login')     
+    if 'username' not in login_session:
+        return redirect('/login')     
     editedCategory = session.query(Category).filter_by(name=category).one()
     editedItem = session.query(CategoryItem).filter_by(id=item_id).one()
     if request.method == 'POST':
@@ -282,8 +286,8 @@ def editItem(category, item_id):
 def deleteItem(category, item_id):
 
     # LOGIN VALIDATION
-    # if 'username' not in login_session:
-    #     return redirect('/login') 
+
+
     deleteItemCategory = session.query(Category).filter_by(name=category).one()     
     itemToDelete = session.query(CategoryItem).filter_by(id=item_id).one()
     if request.method == 'POST':
@@ -293,6 +297,29 @@ def deleteItem(category, item_id):
         return redirect(url_for('showCategories', category=category))
     else:
         return render_template('deleteCategoryItem.html', item=itemToDelete)
+
+
+# User functions 
+def createUser(login_session):
+    newUser = User(name=login_session['username'], email=login_session[
+                   'email'], picture=login_session['picture'])
+    session.add(newUser)
+    session.commit()
+    user = session.query(User).filter_by(email=login_session['email']).one()
+    return user.id
+
+
+def getUserInfo(user_id):
+    user = session.query(User).filter_by(id=user_id).one()
+    return user
+
+
+def getUserID(email):
+    try:
+        user = session.query(User).filter_by(email=email).one()
+        return user.id
+    except:
+        return None
 
 
 if __name__ == '__main__':

@@ -29,24 +29,26 @@
     {% endwith %}
 
 </div>
-	
+	{% if 'username' in session %}
+
 	<div class="row padding-top padding-bottom">
 		<div class="col-md-1"></div>
 		<div class="col-md-10 padding-none">
 			<a href="{{url_for('newCategory')}}">
 				<button class="btn btn-default" id="new-category">
-					<span class="glyphicon glyphicon-cutlery" aria-hidden="true"></span>Add Category
+					<span class="glyphicon glyphicon-plus" aria-hidden="true"></span>Add Category
 				</button>
 			</a>
 		</div>
 		<div class="col-md-1"></div>
 	</div>
+	{% endif %}
 	{% for category in categories %}
 	<!-- you need to edit this when the item page is created.-->
 		<a href = "{{url_for('showItems', category = category.name)}}">
 			<div class="row">
 				<div class="col-md-1"></div>
-					<div class="col-md-10 restaurant-list">
+					<div class="col-md-10 category-list">
 						<h3>{{category.name}}</h3>
 					</div>
 				<div class="col-md-1"></div>
