@@ -160,6 +160,7 @@ def gdisconnect():
         response.headers['Content-Type'] = 'application/json'
         return response
 
+
 # Catalog Section
 
 @app.route('/')
@@ -321,8 +322,17 @@ def getUserID(email):
     except:
         return None
 
+# API Endpoints
+
+# API endpoint for all categories
+
+@app.route('/json')
+def itemsJSON():
+    category_item = session.query(CategoryItem).order_by(asc(CategoryItem.name))
+    return jsonify(categorylist=[c.serialize for c in category_item])
+
+# API Endpoint for all items
 
 if __name__ == '__main__':
     app.secret_key = 'super_secret_key'
-    app.debug = True
     app.run(host='0.0.0.0', port=5000)
